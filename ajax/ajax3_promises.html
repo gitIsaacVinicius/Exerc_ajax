@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<body>
+<div id="demo">
+    <h1>Promises</h1>
+    <h3>O fetch já é a ferramenta moderna que usa Promises. Utiliza-se .then() (para o sucesso) e .catch() (para o erro).</h3>
+    <input type="text" name="cep" id="cep" placeholder="Digite seu CEP">
+    <button type="button" onclick="loadDoc()">Pesquisar CEP</button>
+    <br>
+    <input type="text" id="logradouro" placeholder="Logradouro">
+    <br>
+    <input type="text" id="complemento" placeholder="Complemento">
+    <br>
+    <input type="text" id="bairro" placeholder="Bairro">
+    <br>
+    <input type="text" id="localidade" placeholder="Cidade">
+    <br>
+    <input type="text" id="uf" placeholder="UF">
+</div>
+
+<script>
+function loadDoc() {
+  
+  // 1. Pegamos o CEP que a pessoa digitou
+  let cep = document.getElementById("cep").value; 
+  let url = `https://viacep.com.br/ws/${cep}/json`;
+  
+  console.log("1. Fazendo o pedido para a URL:", url);
+
+  // 2. O Pedido (Fetch)
+  // O fetch() começa a busca e nos devolve uma "Promessa"
+  fetch(url)
+    
+    // 3. O Primeiro ".then()" (Quando o servidor atende)
+    // Se o servidor atender, ele dá uma "resposta".
+    // Esta 'resposta' ainda não são os dados, é só a "caixa" do pedido.
+    .then(function(resposta) {
+      console.log("2. O servidor atendeu. Verificando a 'caixa'...");
+
+      // Se a "caixa" veio com um aviso de erro (como 404, 500),
+      // pula para o .catch()
+      if (!resposta.ok) {
+        throw new Error("Erro de rede. Status: " + resposta.status);
+      }
+      
+      // Se a "caixa" está boa, mandamos "abrir" ela.
+      // 'resposta.json()' é outra "Promessa", pois leva um tempo para abrir.
+      return resposta.json(); 
+    })
+    
+    // 4. O Segundo ".then()" (Quando a caixa é aberta)
+    // Agora o 'endereco' são os dados que estavam dentro da caixa.
+    .then(function(endereco) {
+      console.log("3. Caixa aberta! Aqui estão os dados:", endereco);
+
+      // Precisamos checar se o ViaCEP disse que o CEP não existe.
+      // Ele faz isso mandando 'erro: true' dentro da caixa.
+      if (endereco.erro) {
+        // Se 'endereco.erro' for 'true', nós causamos um erro
+        // para pular direto para o .catch()
+        throw new Error("CEP não encontrado.");
+      }
+      
+      // Se não teve 'endereco.erro', deu tudo certo!
+      // Vamos preencher os campos.
+      document.getElementById("logradouro").value = endereco.logradouro;
+      document.getElementById("complemento").value = endereco.complemento;
+      document.getElementById("bairro").value = endereco.bairro;
+      document.getElementById("localidade").value = endereco.localidade;
+      document.getElementById("uf").value = endereco.uf;
+    })
+    
+    // 5. O ".catch()" (Se qualquer coisa der errado)
+    // Se a internet cair (passo 3), ou se o CEP não for encontrado (passo 4),
+    // o código pula direto para cá.
+    .catch(function(erro) {
+      console.error("4. Ops! Algo deu errado:", erro);
+      alert("Não foi possível encontrar o CEP. Verifique o número e tente novamente.");
+    });
+}
+</script>
+
+</body>
+</html>

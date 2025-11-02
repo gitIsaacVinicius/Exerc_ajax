@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<body>
+<div id="demo">
+    <h1>Fetch</h1>
+    <input type="text" name="cep" id="cep" placeholder="Digite seu CEP">
+    <button type="button" onclick="loadDoc()">Pesquisar CEP</button>
+    <br>
+    <input type="text" id="logradouro" placeholder="Logradouro">
+    <br>
+    <input type="text" id="complemento" placeholder="Complemento">
+    <br>
+    <input type="text" id="bairro" placeholder="Bairro">
+    <br>
+    <input type="text" id="localidade" placeholder="Cidade">
+    <br>
+    <input type="text" id="uf" placeholder="UF">
+</div>
+
+<script>
+function loadDoc() {
+  
+  let cep = document.getElementById("cep").value; 
+  let url = `https://viacep.com.br/ws/${cep}/json`;
+  
+  console.log("Fazendo o pedido para a URL:", url);
+
+  fetch(url)
+    .then(function(resposta) {
+      console.log("O servidor respondeu!");
+
+      if (!resposta.ok) {
+        // Isso vai pegar erros de rede ou se o CEP for mal formatado (ex: "abc")
+        throw new Error("Erro de rede ou CEP mal formatado. Status: " + resposta.status);
+      }
+      
+      return resposta.json(); 
+    })
+    .then(function(endereco) {
+      console.log("Aqui estão os dados do endereço:", endereco);
+
+      // Verificamos se o próprio ViaCEP nos disse que o CEP não existe
+      if (endereco.erro) {
+        // Se 'endereco.erro' for 'true', o CEP não foi encontrado.
+        //"Joga-se" um erro para pular direto para o .catch()
+        throw new Error("CEP não encontrado (o ViaCEP retornou 'erro: true').");
+      }
+
+      // Agora é só preencher os campos, igualzinho ao código antigo!
+      document.getElementById("logradouro").value = endereco.logradouro;
+      document.getElementById("complemento").value = endereco.complemento;
+      document.getElementById("bairro").value = endereco.bairro;
+      document.getElementById("localidade").value = endereco.localidade;
+      document.getElementById("uf").value = endereco.uf;
+    })
+    
+    // 5. O '.catch()' - Se qualquer coisa der errado
+    // Se a internet cair OU se o CEP não for encontrado,
+    // o código pula para cá.
+    .catch(function(erro) {
+      console.error("Algo deu muito errado:", erro);
+      alert("Não foi possível encontrar o CEP. Verifique o número e tente novamente.");
+    });
+}
+</script>
+
+</body>
+</html>

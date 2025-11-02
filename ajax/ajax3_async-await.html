@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<body>
+<div id="demo">
+    <h1>async/await</h1>
+    <input type="text" name="cep" id="cep" placeholder="Digite seu CEP">
+    <button type="button" onclick="loadDoc()">Pesquisar CEP</button>
+    <br>
+    <input type="text" id="logradouro" placeholder="Logradouro">
+    <br>
+    <input type="text" id="complemento" placeholder="Complemento">
+    <br>
+    <input type="text" id="bairro" placeholder="Bairro">
+    <br>
+    <input type="text" id="localidade" placeholder="Cidade">
+    <br>
+    <input type="text" id="uf" placeholder="UF">
+</div>
+
+<script>
+// 1. É "avisado" que a função é especial com a palavra 'async'
+// 'async' significa: "JavaScript, esta receita tem passos que demoram"
+async function loadDoc() {
+  
+  // 2. Código em um bloco 'try...catch'
+  // 'try' significa: "Tente fazer tudo isso..."
+  // 'catch' significa: "...Se qualquer coisa der errado, pule para cá."
+  try {
+    // 3. Pegamos o CEP
+    let cep = document.getElementById("cep").value; 
+    let url = `https://viacep.com.br/ws/${cep}/json`;
+    
+    console.log("1. Vou fazer o pedido e ESPERAR...");
+
+    // 4.
+    // 'await' diz: "PARE AQUI e ESPERE o fetch(url) terminar."
+    // Quando ele terminar, guarde o resultado na "caixa" 'resposta'.
+    const resposta = await fetch(url);
+    console.log("2. O servidor atendeu!");
+
+    // 5. Checa se a "caixa" veio com erro de rede
+    if (!resposta.ok) {
+      throw new Error("Erro de rede. Status: " + resposta.status);
+    }
+
+    // 6.
+    // 'await' diz: "PARE DE NOVO e ESPERE a 'caixa' ser aberta."
+    // Quando 'resposta.json()' terminar, guarde os dados em 'endereco'.
+    const endereco = await resposta.json();
+    console.log("3. A caixa foi aberta! Dados:", endereco);
+
+    // 7. Checa se o CEP não foi encontrado
+    if (endereco.erro) {
+      throw new Error("CEP não encontrado.");
+    }
+
+    // 8. Se chegar até aqui, deu tudo certo!
+    console.log("4. Preenchendo os campos.");
+    document.getElementById("logradouro").value = endereco.logradouro;
+    document.getElementById("complemento").value = endereco.complemento;
+    document.getElementById("bairro").value = endereco.bairro;
+    document.getElementById("localidade").value = endereco.localidade;
+    document.getElementById("uf").value = endereco.uf;
+  
+  } catch (erro) {
+    // 9. Se QUALQUER 'throw new Error' ou erro de internet
+    // acontecer dentro do 'try', o código pula direto para cá.
+    console.error("Ops! Deu um problema:", erro);
+    alert("Não foi possível encontrar o CEP. Verifique o número e tente novamente.");
+  }
+}
+</script>
+
+</body>
+</html>
